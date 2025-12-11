@@ -1,0 +1,5 @@
+---
+- hosts: flask
+  become: yes
+  roles:
+    - flask

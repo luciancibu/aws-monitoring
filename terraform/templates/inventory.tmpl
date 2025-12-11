@@ -1,0 +1,11 @@
+all:
+  vars:
+    ansible_ssh_private_key_file: ${clientkey}.pem
+    flask_port: 5000
+    
+  hosts:
+    flask:
+      ansible_host: ${python_ip}
+      ansible_user: ${python_user}
+
+
