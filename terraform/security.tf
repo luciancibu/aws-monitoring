@@ -31,3 +31,46 @@ resource "aws_security_group" "ansible_sg" {
     Project = var.projectName
   }
 }
+
+# Flask Security Group
+resource "aws_security_group" "flask_sg" {
+  name        = "${var.projectName}-flask-sg"
+  description = "Security group for flask"
+  vpc_id      = data.aws_vpc.default_vpc.id
+
+  ingress {
+    description = "SSH"
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = ["${aws_instance.ansible_ec2.private_ip}/32"]
+  }
+
+  ingress {
+    description = "SSH"
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = ["${var.myIP}/32"]
+  }
+
+  ingress {
+    description     = "Access from Nginx"
+    from_port       = 5000
+    to_port         = 5000
+    protocol        = "tcp"
+    cidr_blocks = ["${var.myIP}/32"]
+  }  
+  
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = {
+    Name    = "${var.projectName}-nginx-sg"
+    Project = var.projectName
+  }
+}

@@ -40,3 +40,29 @@ resource "aws_ec2_instance_state" "ansible_ec2-state" {
   instance_id = aws_instance.ansible_ec2.id
   state       = "running"
 }
+
+# Flask
+resource "aws_instance" "python_flask" {
+  ami                    = data.aws_ami.ubuntu_24_04.id
+  instance_type          = var.instanceType
+  key_name               = aws_key_pair.monitoringKeypair.key_name
+  vpc_security_group_ids = [aws_security_group.flask_sg.id]
+  availability_zone      = var.zone
+
+  root_block_device {
+  volume_size = 20     
+  volume_type = "gp3"
+  delete_on_termination = true
+  }
+
+  tags = {
+    Name    = "${var.projectName}-flask"
+    Project = var.projectName
+    os = "ubuntu"
+  }
+}
+
+resource "aws_ec2_instance_state" "python_flask-state" {
+  instance_id = aws_instance.python_flask.id
+  state       = "running"
+}
