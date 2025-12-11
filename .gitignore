@@ -1,4 +1,5 @@
 _tests
+deployment_script.sh
 terraform/.terraform/
 terraform/terraform.tfstate
 terraform/*.txt
@@ -8,8 +9,9 @@ terraform/*.info
 terraform/*.backup
 terraform/*.tfvars
 terraform/*.ini
-ansible/*.pem
-ansible/monitoring-key
+terraform/*.pem
 *.tfstate
+ansible/inventory
+ansible/monitoring*
 *.zip
 *.pem
