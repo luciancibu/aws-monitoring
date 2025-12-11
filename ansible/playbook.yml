@@ -1,5 +1,5 @@
 ---
-- hosts: flask
+- hosts: app
   become: yes
   roles:
-    - flask
+    - app

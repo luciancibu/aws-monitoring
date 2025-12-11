@@ -1,22 +1,18 @@
 ---
-- name: Install python & deps
+- name: Install packages
   apt:
     name:
+      - nginx
+      - nano
+      - vim
       - python3
       - python3-pip
       - python3-venv
       - mariadb-client
       - libmariadb-dev
-      - build-essential
-    update_cache: yes
-
-- name: Install nano & vim & netcat on Flask server
-  apt:
-    name:
-      - netcat-openbsd
-      - nano
-      - vim
+      - build-essential      
     state: present
+    update_cache: yes
 
 - name: Create virtualenv
   command: python3 -m venv /opt/flaskenv
@@ -25,11 +21,7 @@
 
 - name: Install Flask
   command: /opt/flaskenv/bin/pip install flask
-  notify: Restart Flask
-
-- name: Install MariaDB Python driver
-  command: /opt/flaskenv/bin/pip install mariadb
-  notify: Restart Flask
+  notify: Restart Flask    
 
 - name: Deploy Flask app from template
   template:
@@ -60,4 +52,34 @@
 - name: Enable Flask
   systemd:
     name: flask
+    enabled: yes
+
+- name: Deploy nginx site config
+  template:
+    src: default.j2
+    dest: /etc/nginx/sites-available/default
+  notify: Restart nginx
+
+- name: Enable nginx site
+  file:
+    src: /etc/nginx/sites-available/default
+    dest: /etc/nginx/sites-enabled/default
+    state: link
+    force: yes
+
+- name: Copy website files
+  copy:
+    src: "{{ item }}"
+    dest: "/var/www/html/{{ item }}"
+    owner: www-data
+    group: www-data
+    mode: '0644'
+  loop:
+    - index.html
+    - style.css
+
+- name: Ensure nginx is running
+  systemd:
+    name: nginx
+    state: started
     enabled: yes

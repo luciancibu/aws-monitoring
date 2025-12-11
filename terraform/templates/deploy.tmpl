@@ -10,7 +10,7 @@ echo "Delete old files..."
 ssh -i "$PROJECT_DIR/ansible/$CLIENT_KEY" -o StrictHostKeyChecking=no \
     -o UserKnownHostsFile=/dev/null \
     "$USER@$CONTROL_NODE_IP" \
-    "sudo rm -r $REMOTE_PATH/*"
+    "sudo rm -r $REMOTE_PATH/ansible"
 
 echo "Copying Ansible folder to EC2 control node..."
 scp -i "$PROJECT_DIR/ansible/$CLIENT_KEY" -o StrictHostKeyChecking=no \
@@ -21,10 +21,10 @@ echo "Setting correct key permissions..."
 ssh -i "$PROJECT_DIR/ansible/$CLIENT_KEY" -o StrictHostKeyChecking=no \
     -o UserKnownHostsFile=/dev/null \
     "$USER@$CONTROL_NODE_IP" \
-    "chmod 400 $REMOTE_PATH/ansible/$CLIENT_KEY.pem"
+    "chmod 400 $REMOTE_PATH/ansible/$CLIENT_KEY"
 
-echo "Running Ansible Playbook..."
-ssh -i "$PROJECT_DIR/ansible/$CLIENT_KEY" -o StrictHostKeyChecking=no \
-    -o UserKnownHostsFile=/dev/null \
-    "$USER@$CONTROL_NODE_IP" \
-    "cd $REMOTE_PATH/ansible && ansible-playbook playbook.yml"
+# echo "Running Ansible Playbook..."
+# ssh -i "$PROJECT_DIR/ansible/$CLIENT_KEY" -o StrictHostKeyChecking=no \
+#     -o UserKnownHostsFile=/dev/null \
+#     "$USER@$CONTROL_NODE_IP" \
+#     "cd $REMOTE_PATH/ansible && ansible-playbook playbook.yml"

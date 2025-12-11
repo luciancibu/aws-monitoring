@@ -16,6 +16,7 @@ resource "local_file" "python_flask" {
 
   content = templatefile("${path.module}/templates/inventory.tmpl", {
     python_ip  = aws_instance.python_flask.private_ip
+    python_ip_public  = aws_instance.python_flask.public_ip
     python_user  = var.ansibleUserByOS[aws_instance.python_flask.tags.os]
 
     clientkey  = aws_key_pair.monitoringKeypair.key_name

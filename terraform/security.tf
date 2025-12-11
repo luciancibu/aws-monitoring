@@ -55,9 +55,9 @@ resource "aws_security_group" "flask_sg" {
   }
 
   ingress {
-    description     = "Access from Nginx"
-    from_port       = 5000
-    to_port         = 5000
+    description     = "Access from MyIP"
+    from_port       = 80
+    to_port         = 80
     protocol        = "tcp"
     cidr_blocks = ["${var.myIP}/32"]
   }  

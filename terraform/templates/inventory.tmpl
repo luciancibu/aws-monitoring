@@ -4,8 +4,11 @@ all:
     flask_port: 5000
     
   hosts:
-    flask:
-      ansible_host: ${python_ip}
-      ansible_user: ${python_user}
+    app:
+      target_private_ip: ${python_ip}
+      target_public_ip: ${python_ip_public}
+      target_ansible_user: ${python_user}
+      
+
 
 
