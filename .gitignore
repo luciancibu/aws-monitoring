@@ -8,7 +8,8 @@ terraform/*.info
 terraform/*.backup
 terraform/*.tfvars
 terraform/*.ini
-terraform/*.pem
+ansible/*.pem
+ansible/monitoring-key
 *.tfstate
 *.zip
 *.pem
