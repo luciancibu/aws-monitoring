@@ -37,3 +37,21 @@ resource "local_file" "ansible_deployment" {
     clientkey        = "${aws_key_pair.monitoringKeypair.key_name}.pem"
   })
 }
+
+# output "db_secret_arn" {
+#   value = aws_db_instance.mysql.master_user_secret[0].secret_arn
+# }
+
+# output "db_endpoint" {
+#   value = aws_db_instance.mysql.address
+# }
+
+# # Flask.service script for Ansible 
+# resource "local_file" "flask_service_variables" {
+#   filename = "${path.root}/../ansible/roles/app/templates/flask.service.j2"
+
+#   content = templatefile("${path.module}/templates/flask_service.tmpl", {
+#     db_secret_arn       = aws_db_instance.mysql.master_user_secret[0].secret_arn
+#     aws_region     = var.region
+#   })
+# }

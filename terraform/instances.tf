@@ -48,6 +48,8 @@ resource "aws_instance" "python_flask" {
   key_name               = aws_key_pair.monitoringKeypair.key_name
   vpc_security_group_ids = [aws_security_group.flask_sg.id]
   availability_zone      = var.zone
+  iam_instance_profile = aws_iam_instance_profile.secret_manager_profile.name
+
 
   root_block_device {
   volume_size = 20     
