@@ -1,0 +1,78 @@
+---
+- name: Install required packages
+  apt:
+    name:
+      - unzip
+      - curl
+    state: present
+    update_cache: true
+
+- name: Create Loki group
+  group:
+    name: "{{ loki_group }}"
+    system: true
+
+- name: Create Loki user
+  user:
+    name: "{{ loki_user }}"
+    group: "{{ loki_group }}"
+    system: true
+    shell: /usr/sbin/nologin
+    create_home: false
+
+- name: Create directories
+  file:
+    path: "{{ item }}"
+    state: directory
+    owner: "{{ loki_user }}"
+    group: "{{ loki_group }}"
+    mode: "0755"
+  loop:
+    - "{{ loki_work_dir }}"
+    - "{{ loki_config_dir }}"
+    - "{{ loki_data_dir }}"
+    - "{{ loki_data_dir }}/chunks"
+    - "{{ loki_data_dir }}/rules"
+
+- name: Download Loki archive
+  get_url:
+    url: "{{ loki_download_url }}"
+    dest: "{{ loki_work_dir }}/loki.zip"
+    mode: "0644"
+
+- name: Extract Loki binary
+  unarchive:
+    src: "{{ loki_work_dir }}/loki.zip"
+    dest: "{{ loki_work_dir }}"
+    remote_src: true
+
+- name: Install Loki binary
+  copy:
+    src: "{{ loki_work_dir }}/loki-linux-amd64"
+    dest: "{{ loki_bin_dir }}/{{ loki_binary }}"
+    mode: "0755"
+    remote_src: true
+  notify: Restart Loki
+
+- name: Deploy Loki config
+  template:
+    src: config.yml.j2
+    dest: "{{ loki_config_dir }}/config.yml"
+    owner: "{{ loki_user }}"
+    group: "{{ loki_group }}"
+    mode: "0644"
+  notify: Restart Loki
+
+- name: Deploy Loki systemd service
+  template:
+    src: loki.service.j2
+    dest: /etc/systemd/system/loki.service
+    mode: "0644"
+  notify: Restart Loki
+
+- name: Enable and start Loki service
+  systemd:
+    name: loki
+    enabled: true
+    state: started
+    daemon_reload: true

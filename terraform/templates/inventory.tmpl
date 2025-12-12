@@ -13,7 +13,10 @@ all:
       ansible_user: ${grafana_user}
     prometheus:
       ansible_host: ${prometheus_ip}
-      ansible_user: ${prometheus_user}      
+      ansible_user: ${prometheus_user}
+    loki:
+      ansible_host: ${loki_ip}
+      ansible_user: ${loki_user}          
             
       
 

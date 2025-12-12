@@ -194,3 +194,61 @@ resource "aws_security_group" "prometheus_sg" {
     Project = var.projectName
   }
 }
+
+# Loki Security Group
+resource "aws_security_group" "loki_sg" {
+  name = "${var.projectName}-loki-sg"
+  description = "Security group for Loki"
+  vpc_id     = data.aws_vpc.default_vpc.id
+
+  ingress {
+    description     = "Loki from Flask/Alloy"
+    from_port       = 3100
+    to_port         = 3100
+    protocol        = "tcp"
+    security_groups = [aws_security_group.flask_sg.id]
+  }
+
+  ingress {
+    description     = "Loki from Grafana"
+    from_port       = 3100
+    to_port         = 3100
+    protocol        = "tcp"
+    security_groups = [aws_security_group.grafana_sg.id]
+  }  
+
+  ingress {
+    description     = "Loki from my IP"
+    from_port       = 3100
+    to_port         = 3100
+    protocol        = "tcp"
+    cidr_blocks = ["${var.myIP}/32"]
+  }  
+
+  ingress {
+    description = "SSH from my IP"
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = ["${var.myIP}/32"]
+  }
+
+  ingress {
+    description = "Loki from Ansible"
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    security_groups = [aws_security_group.ansible_sg.id]
+  }
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = {
+    Name    = "${var.projectName}-loki-sg"
+    Project = var.projectName
+  }
+}

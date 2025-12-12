@@ -122,3 +122,23 @@ resource "aws_ec2_instance_state" "prometheus-state" {
   instance_id = aws_instance.prometheus.id
   state       = "running"
 }
+
+# Loki
+resource "aws_instance" "loki" {
+  ami                    = data.aws_ami.ubuntu_24_04.id
+  instance_type          = var.instanceType
+  key_name               = aws_key_pair.monitoringKeypair.key_name
+  vpc_security_group_ids = [aws_security_group.loki_sg.id]
+  availability_zone      = var.zone
+
+  tags = {
+    Name    = "${var.projectName}-loki"
+    Project = var.projectName
+    os = "ubuntu"
+  }
+}
+
+resource "aws_ec2_instance_state" "loki-state" {
+  instance_id = aws_instance.loki.id
+  state       = "running"
+}

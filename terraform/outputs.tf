@@ -26,7 +26,11 @@ resource "local_file" "python_flask" {
 
     # Prometheus
     prometheus_ip  = aws_instance.prometheus.private_ip
-    prometheus_user  = var.ansibleUserByOS[aws_instance.prometheus.tags.os]    
+    prometheus_user  = var.ansibleUserByOS[aws_instance.prometheus.tags.os]
+
+    # Loki
+    loki_ip  = aws_instance.loki.private_ip
+    loki_user  = var.ansibleUserByOS[aws_instance.loki.tags.os]    
 
     clientkey  = aws_key_pair.monitoringKeypair.key_name
     

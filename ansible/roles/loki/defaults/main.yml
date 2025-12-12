@@ -1,0 +1,15 @@
+loki_version: "3.5.7"
+
+loki_download_url: "https://github.com/grafana/loki/releases/download/v{{ loki_version }}/loki-linux-amd64.zip"
+
+loki_work_dir: /tmp/loki
+loki_bin_dir: /usr/local/bin
+loki_binary: loki
+
+loki_user: loki
+loki_group: loki
+
+loki_config_dir: /etc/loki
+loki_data_dir: /var/lib/loki
+
+loki_http_port: 3100
