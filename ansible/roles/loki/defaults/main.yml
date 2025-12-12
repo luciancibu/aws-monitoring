@@ -1,3 +1,4 @@
+---
 loki_version: "3.5.7"
 
 loki_download_url: "https://github.com/grafana/loki/releases/download/v{{ loki_version }}/loki-linux-amd64.zip"

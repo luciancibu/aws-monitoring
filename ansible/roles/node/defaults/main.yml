@@ -1,0 +1,12 @@
+---
+node_version: "1.10.2"
+
+node_download_url: "https://github.com/prometheus/node_exporter/releases/download/v{{ node_version }}/node_exporter-{{ node_version }}.linux-amd64.tar.gz"
+
+node_user: prometheus
+node_group: prometheus
+
+node_data_dir: /var/lib/node
+node_tmp_dir: /tmp/exporter
+
+node_service_name: node

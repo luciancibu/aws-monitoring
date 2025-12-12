@@ -1,6 +1,6 @@
 server {
     listen 80;
-    server_name {{ hostvars['app']['public_ip'] }};
+    server_name {{ hostvars['flask']['public_ip'] }};
 
     root /var/www/html;
     index index.html;

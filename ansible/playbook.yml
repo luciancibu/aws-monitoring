@@ -22,3 +22,10 @@
   become: yes
   roles:
     - loki
+
+- name: Install Node
+  hosts: flask
+  become: yes
+  roles:
+    - node
+

@@ -1,3 +1,4 @@
+---
 grafana_version: "12.2.1"
 grafana_build: "18655849634"
 grafana_arch: "linux_amd64"
