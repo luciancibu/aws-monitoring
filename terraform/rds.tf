@@ -19,6 +19,15 @@ resource "aws_db_instance" "mysql" {
 
 resource "aws_secretsmanager_secret" "mysql_secret" {
   name = "${var.projectName}-mysql-secret"
+  recovery_window_in_days = 7
+
+  lifecycle {
+    prevent_destroy = true
+  }
+  
+  tags = {
+    Project = var.projectName
+  }
 }
 
 resource "aws_secretsmanager_secret_version" "mysql_secret_version" {
