@@ -6,25 +6,35 @@ USER=${ansible_user}
 CLIENT_KEY=${clientkey}
 REMOTE_PATH="/home/$USER"
 
-echo "Delete old files..."
+echo "Deleting old files..."
 ssh -i "$PROJECT_DIR/ansible/$CLIENT_KEY" -o StrictHostKeyChecking=no \
     -o UserKnownHostsFile=/dev/null \
     "$USER@$CONTROL_NODE_IP" \
     "sudo rm -r $REMOTE_PATH/ansible"
+
+echo "Creating run.sh script..."
+ssh -i "$PROJECT_DIR/ansible/$CLIENT_KEY" \
+    -o StrictHostKeyChecking=no \
+    -o UserKnownHostsFile=/dev/null \
+    "$USER@$CONTROL_NODE_IP" << 'EOF'
+cat > run.sh << 'SCRIPT'
+#!/bin/bash
+set -e
+
+cd ansible
+chmod 400 monitoring-key.pem
+ansible-playbook playbook.yml
+SCRIPT
+EOF
 
 echo "Copying Ansible folder to EC2 control node..."
 scp -i "$PROJECT_DIR/ansible/$CLIENT_KEY" -o StrictHostKeyChecking=no \
     -o UserKnownHostsFile=/dev/null \
     -r "$PROJECT_DIR/ansible" "$USER@$CONTROL_NODE_IP:$REMOTE_PATH"
 
-echo "Setting correct key permissions..."
-ssh -i "$PROJECT_DIR/ansible/$CLIENT_KEY" -o StrictHostKeyChecking=no \
+echo "Running the script..."
+ssh -i "$PROJECT_DIR/ansible/$CLIENT_KEY" \
+    -o StrictHostKeyChecking=no \
     -o UserKnownHostsFile=/dev/null \
     "$USER@$CONTROL_NODE_IP" \
-    "chmod 400 $REMOTE_PATH/ansible/$CLIENT_KEY"
-
-# echo "Running Ansible Playbook..."
-# ssh -i "$PROJECT_DIR/ansible/$CLIENT_KEY" -o StrictHostKeyChecking=no \
-#     -o UserKnownHostsFile=/dev/null \
-#     "$USER@$CONTROL_NODE_IP" \
-#     "cd $REMOTE_PATH/ansible && ansible-playbook playbook.yml"
+    "chmod +x $REMOTE_PATH/run.sh && cd $REMOTE_PATH && ./run.sh"

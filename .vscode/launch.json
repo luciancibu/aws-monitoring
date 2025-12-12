@@ -1,0 +1,14 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Deploy (F5)",
+      "type": "cppdbg",
+      "request": "launch",
+      "program": "echo",
+      "args": ["Deploy trigger"],
+      "preLaunchTask": "Run Deployment Script",
+      "console": "integratedTerminal"
+    }
+  ]
+}
