@@ -16,3 +16,4 @@ ansible/monitoring*
 ansible/roles/app/templates/flask.service.j2
 *.zip
 *.pem
+*.sh
