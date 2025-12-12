@@ -21,7 +21,7 @@
     - prometheus
     
 - name: Install Loki
-  hosts: prometheus
+  hosts: loki
   become: yes
   roles:
     - loki
