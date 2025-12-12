@@ -19,6 +19,9 @@ resource "local_file" "python_flask" {
     python_ip_public  = aws_instance.python_flask.public_ip
     python_user  = var.ansibleUserByOS[aws_instance.python_flask.tags.os]
 
+    grafana_ip  = aws_instance.grafana.private_ip
+    grafana_user  = var.ansibleUserByOS[aws_instance.grafana.tags.os]
+
     clientkey  = aws_key_pair.monitoringKeypair.key_name
     
     depends_on = [

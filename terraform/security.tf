@@ -100,3 +100,46 @@ resource "aws_security_group" "rds_sg" {
     Project = var.projectName
   }
 }
+
+resource "aws_security_group" "grafana_sg" {
+  name = "${var.projectName}-grafana-sg"
+  description = "Security group for Grafana"
+  vpc_id     = data.aws_vpc.default_vpc.id
+
+  ingress {
+    description     = "MySQL from Flask EC2"
+    from_port       = 3000
+    to_port         = 3000
+    protocol        = "tcp"
+    cidr_blocks = ["${var.myIP}/32"]
+  }
+
+  ingress {
+    description = "SSH from my IP"
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = ["${var.myIP}/32"]
+  }
+
+  ingress {
+    description     = "Grafana from Ansible"
+    from_port       = 22
+    to_port         = 22
+    protocol        = "tcp"
+    security_groups = [aws_security_group.ansible_sg.id]
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = {
+    Name    = "${var.projectName}-grafana-sg"
+    Project = var.projectName
+  }
+}
+

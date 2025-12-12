@@ -1,0 +1,33 @@
+---
+- name: Update apt cache
+  apt:
+    update_cache: true
+
+- name: Upgrade system packages
+  apt:
+    upgrade: dist
+
+- name: Install Grafana dependencies
+  apt:
+    name:
+      - adduser
+      - libfontconfig1
+      - musl
+    state: present
+
+- name: Download Grafana Enterprise package
+  get_url:
+    url: "{{ grafana_download_url }}"
+    dest: "/tmp/{{ grafana_package }}"
+    mode: "0644"
+
+- name: Install Grafana Enterprise
+  apt:
+    deb: "/tmp/{{ grafana_package }}"
+  notify: Restart Grafana
+
+- name: Enable and start Grafana service
+  systemd:
+    name: grafana-server
+    enabled: true
+    state: started

@@ -81,3 +81,24 @@ resource "aws_ec2_instance_state" "python_flask-state" {
   instance_id = aws_instance.python_flask.id
   state       = "running"
 }
+
+
+# Grafana
+resource "aws_instance" "grafana" {
+  ami                    = data.aws_ami.ubuntu_24_04.id
+  instance_type          = var.instanceType
+  key_name               = aws_key_pair.monitoringKeypair.key_name
+  vpc_security_group_ids = [aws_security_group.grafana_sg.id]
+  availability_zone      = var.zone
+
+  tags = {
+    Name    = "${var.projectName}-grafana"
+    Project = var.projectName
+    os = "ubuntu"
+  }
+}
+
+resource "aws_ec2_instance_state" "grafana-state" {
+  instance_id = aws_instance.grafana.id
+  state       = "running"
+}

@@ -1,0 +1,7 @@
+grafana_version: "12.2.1"
+grafana_build: "18655849634"
+grafana_arch: "linux_amd64"
+
+grafana_package: "grafana-enterprise_{{ grafana_version }}_{{ grafana_build }}_{{ grafana_arch }}.deb"
+grafana_download_url: "https://dl.grafana.com/grafana-enterprise/release/{{ grafana_version }}/{{ grafana_package }}"
+

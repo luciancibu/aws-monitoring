@@ -1,5 +1,12 @@
 ---
-- hosts: app
+- name: Deploy application
+  hosts: app
   become: yes
   roles:
     - app
+
+- name: Install Grafana
+  hosts: grafana
+  become: yes
+  roles:
+    - grafana
