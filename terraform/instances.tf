@@ -102,3 +102,23 @@ resource "aws_ec2_instance_state" "grafana-state" {
   instance_id = aws_instance.grafana.id
   state       = "running"
 }
+
+# Prometheus
+resource "aws_instance" "prometheus" {
+  ami                    = data.aws_ami.ubuntu_24_04.id
+  instance_type          = var.instanceType
+  key_name               = aws_key_pair.monitoringKeypair.key_name
+  vpc_security_group_ids = [aws_security_group.prometheus_sg.id]
+  availability_zone      = var.zone
+
+  tags = {
+    Name    = "${var.projectName}-prometheus"
+    Project = var.projectName
+    os = "ubuntu"
+  }
+}
+
+resource "aws_ec2_instance_state" "prometheus-state" {
+  instance_id = aws_instance.prometheus.id
+  state       = "running"
+}

@@ -75,6 +75,7 @@ resource "aws_security_group" "flask_sg" {
   }
 }
 
+# RDS Security Group
 resource "aws_security_group" "rds_sg" {
   name = "${var.projectName}-rds-sg"
   description = "Security group for RDS"
@@ -101,6 +102,7 @@ resource "aws_security_group" "rds_sg" {
   }
 }
 
+# Grafana Security Group
 resource "aws_security_group" "grafana_sg" {
   name = "${var.projectName}-grafana-sg"
   description = "Security group for Grafana"
@@ -143,3 +145,52 @@ resource "aws_security_group" "grafana_sg" {
   }
 }
 
+# Prometheus Security Group
+resource "aws_security_group" "prometheus_sg" {
+  name = "${var.projectName}-prometheus-sg"
+  description = "Security group for Prometheus"
+  vpc_id     = data.aws_vpc.default_vpc.id
+
+  ingress {
+    description     = "Prometheus from Grafana"
+    from_port       = 9090
+    to_port         = 9090
+    protocol        = "tcp"
+    security_groups = [aws_security_group.grafana_sg.id]
+  }
+
+  ingress {
+    description     = "Prometheus from my IP"
+    from_port       = 9090
+    to_port         = 9090
+    protocol        = "tcp"
+    cidr_blocks = ["${var.myIP}/32"]
+  }  
+
+  ingress {
+    description = "SSH from my IP"
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = ["${var.myIP}/32"]
+  }
+
+  ingress {
+    description = "Prometheus from Ansible"
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    security_groups = [aws_security_group.ansible_sg.id]
+  }
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = {
+    Name    = "${var.projectName}-prometheus-sg"
+    Project = var.projectName
+  }
+}
