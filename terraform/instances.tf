@@ -50,9 +50,22 @@ resource "aws_instance" "python_flask" {
   availability_zone      = var.zone
   iam_instance_profile = aws_iam_instance_profile.secret_manager_profile.name
 
+  user_data = <<-EOF
+  #!/bin/bash
+  set -xe
+
+  apt update -y
+  apt install -y unzip curl
+  curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" \
+      -o "/tmp/awscliv2.zip"
+  cd /tmp
+  unzip awscliv2.zip
+  ./aws/install      
+  EOF
+
 
   root_block_device {
-  volume_size = 20     
+  volume_size = 10     
   volume_type = "gp3"
   delete_on_termination = true
   }
