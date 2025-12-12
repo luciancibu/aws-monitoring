@@ -1,0 +1,19 @@
+---
+prometheus_remote_write_url: "http://{{ prometheus_ip }}:9090/api/v1/write"
+loki_push_url: "http://{{ loki_ip }}:3100/loki/api/v1/push"
+
+alloy_config_path: /etc/alloy/config.alloy
+alloy_default_path: /etc/default/alloy
+
+metrics_targets:
+  - name: metrics_5000
+    address: "localhost:5000"
+    path: "/metrics"
+
+  - name: metrics_default
+    address: "localhost:8080"
+    path: "/metrics"
+
+titan_logs_path: "/var/log/titan/*.log"
+
+alloy_http_listen_addr: "0.0.0.0:12345"

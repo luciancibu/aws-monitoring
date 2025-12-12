@@ -1,0 +1,43 @@
+- name: Install Grafana Alloy
+  become: true
+  block:
+
+    - name: Install dependencies
+      apt:
+        name:
+          - gnupg
+          - wget
+        state: present
+        update_cache: false
+
+    - name: Create keyrings dir
+      file:
+        path: /etc/apt/keyrings
+        state: directory
+        mode: "0755"
+
+    - name: Install Grafana GPG key
+      shell: |
+        wget -q -O - https://apt.grafana.com/gpg.key \
+        | gpg --dearmor \
+        | tee /etc/apt/keyrings/grafana.gpg > /dev/null
+      args:
+        executable: /bin/bash
+        creates: /etc/apt/keyrings/grafana.gpg
+
+    - name: Add Grafana repo
+      shell: |
+        echo "deb [signed-by=/etc/apt/keyrings/grafana.gpg] https://apt.grafana.com stable main" \
+        | tee /etc/apt/sources.list.d/grafana.list
+      args:
+        executable: /bin/bash
+        creates: /etc/apt/sources.list.d/grafana.list
+
+    - name: Update apt cache
+      apt:
+        update_cache: true
+
+    - name: Install alloy
+      apt:
+        name: alloy
+        state: present

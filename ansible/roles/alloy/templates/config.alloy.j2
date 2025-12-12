@@ -1,0 +1,40 @@
+// Metrics scraping and remote write to Prometheus
+
+prometheus.remote_write "default" {
+  endpoint {
+    url = "{{ prometheus_remote_write_url }}"
+  }
+}
+
+{% for target in metrics_targets %}
+prometheus.scrape "{{ target.name }}" {
+  targets = [{
+    __address__ = "{{ target.address }}",
+    __metrics_path__ = "/metrics",
+  }]
+  forward_to = [prometheus.remote_write.default.receiver]
+}
+{% endfor %}
+
+// Log collection from files and push to Loki
+
+local.file_match "titan_logs" {
+  path_targets = [{
+    __path__ = "/var/log/titan/*.log",
+    job      = "titan",
+    hostname = constants.hostname,
+  }]
+  sync_period = "5s"
+}
+
+loki.source.file "log_scrape" {
+  targets       = local.file_match.titan_logs.targets
+  forward_to    = [loki.write.loki.receiver]
+  tail_from_end = true
+}
+
+loki.write "loki" {
+  endpoint {
+    url = "{{ loki_push_url }}"
+  }
+}

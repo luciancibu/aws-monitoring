@@ -4,6 +4,8 @@
   become: yes
   roles:
     - flask
+    - node
+    - alloy
 
 - name: Install Grafana
   hosts: grafana
@@ -22,10 +24,3 @@
   become: yes
   roles:
     - loki
-
-- name: Install Node
-  hosts: flask
-  become: yes
-  roles:
-    - node
-

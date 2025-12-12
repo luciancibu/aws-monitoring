@@ -8,6 +8,8 @@ all:
       ansible_host: ${python_ip}
       ansible_user: ${python_user}
       public_ip: ${python_ip_public}
+      loki_ip: ${loki_ip}
+      prometheus_ip: ${prometheus_ip}
     grafana:
       ansible_host: ${grafana_ip}
       ansible_user: ${grafana_user}
