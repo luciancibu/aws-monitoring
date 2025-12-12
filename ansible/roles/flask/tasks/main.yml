@@ -24,6 +24,7 @@
       - flask
       - boto3
       - pymysql
+      - prometheus-client
     virtualenv: /opt/flaskenv
     virtualenv_python: python3
   notify: Restart Flask

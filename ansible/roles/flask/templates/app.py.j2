@@ -3,14 +3,39 @@ import pymysql
 import boto3
 import json
 import time
+import os
+import logging
+
+from prometheus_client import Counter, Histogram, generate_latest
 
 app = Flask(__name__)
 _secret_cache = None
 
+# ---------------- logging (systemd friendly) ----------------
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s %(levelname)s %(message)s"
+)
+logger = logging.getLogger(__name__)
 
+# ---------------- Prometheus metrics ----------------
+REQUEST_COUNT = Counter(
+    "http_requests_total",
+    "Total HTTP requests",
+    ["endpoint"]
+)
+
+REQUEST_LATENCY = Histogram(
+    "http_request_duration_seconds",
+    "HTTP request latency",
+    ["endpoint"]
+)
+
+# ---------------- AWS + MySQL ----------------
 def get_secret():
     global _secret_cache
     if _secret_cache is None:
+        logger.info("Fetching DB secret from Secrets Manager")
         client = boto3.client("secretsmanager", region_name="us-east-1")
         _secret_cache = json.loads(
             client.get_secret_value(
@@ -19,9 +44,10 @@ def get_secret():
         )
     return _secret_cache
 
+
 def get_conn():
     secret = get_secret()
-    for _ in range(20):
+    for attempt in range(20):
         try:
             return pymysql.connect(
                 host=secret["host"],
@@ -30,12 +56,14 @@ def get_conn():
                 database=secret["dbname"],
                 connect_timeout=5
             )
-        except pymysql.OperationalError:
+        except pymysql.OperationalError as e:
+            logger.warning(f"MySQL connect failed ({attempt+1}/20): {e}")
             time.sleep(1)
     raise RuntimeError("Could not connect to MySQL")
 
 
 def init_db():
+    logger.info("Initializing DB")
     conn = get_conn()
     cur = conn.cursor()
     cur.execute("""
@@ -52,43 +80,52 @@ def init_db():
     conn.commit()
     conn.close()
 
-
+# ---------------- Routes ----------------
 @app.route("/view")
 def view_counter():
-    try:
-        conn = get_conn()
-        cur = conn.cursor()
+    REQUEST_COUNT.labels(endpoint="/view").inc()
+    with REQUEST_LATENCY.labels(endpoint="/view").time():
+        try:
+            conn = get_conn()
+            cur = conn.cursor()
 
-        read = request.args.get("read") == "true"
-        if not read:
-            cur.execute("UPDATE counter SET views = views + 1 WHERE id=1")
-            conn.commit()
+            read = request.args.get("read") == "true"
+            if not read:
+                cur.execute("UPDATE counter SET views = views + 1 WHERE id=1")
+                conn.commit()
 
-        cur.execute("SELECT views FROM counter WHERE id=1")
-        views = cur.fetchone()[0]
+            cur.execute("SELECT views FROM counter WHERE id=1")
+            views = cur.fetchone()[0]
 
-        conn.close()
-        return str(views)
-    except Exception:
-        import traceback
-        traceback.print_exc()
-        return "ERROR", 500
+            conn.close()
+            return str(views)
+        except Exception:
+            logger.exception("Error in /view")
+            return "ERROR", 500
 
 
 @app.route("/health")
 def health():
-    try:
-        conn = get_conn()
-        cur = conn.cursor()
-        cur.execute("SELECT 1")
-        conn.close()
-        return "OK"
-    except Exception:
-        import traceback
-        traceback.print_exc()
-        return "FAIL", 500
+    REQUEST_COUNT.labels(endpoint="/health").inc()
+    with REQUEST_LATENCY.labels(endpoint="/health").time():
+        try:
+            conn = get_conn()
+            cur = conn.cursor()
+            cur.execute("SELECT 1")
+            conn.close()
+            return "OK"
+        except Exception:
+            logger.exception("Health check failed")
+            return "FAIL", 500
 
 
+@app.route("/metrics")
+def metrics():
+    return generate_latest(), 200, {
+        "Content-Type": "text/plain; version=0.0.4"
+    }
+
+# ---------------- main ----------------
 if __name__ == "__main__":
     init_db()
-    app.run(host="0.0.0.0", port={{ flask_port }}, debug=True)
+    app.run(host="0.0.0.0", port={{ flask_port }}, debug=False)

@@ -60,7 +60,39 @@ resource "aws_security_group" "flask_sg" {
     to_port         = 80
     protocol        = "tcp"
     cidr_blocks      = ["${var.myIP}/32"]
-  }  
+  } 
+
+  ingress {
+    description     = "Access from MyIP"
+    from_port       = 5000
+    to_port         = 5000
+    protocol        = "tcp"
+    cidr_blocks      = ["${var.myIP}/32"]
+  } 
+
+  ingress {
+    description     = "Access from Prometheus"
+    from_port       = 5000
+    to_port         = 5000
+    protocol        = "tcp"
+    security_groups = [aws_security_group.prometheus_sg.id]
+  }
+
+  ingress {
+    description     = "Access from Alloy"
+    from_port       = 9100
+    to_port         = 9100
+    protocol        = "tcp"
+    security_groups = [aws_security_group.prometheus_sg.id]
+  }
+
+  ingress {
+    description     = "Access from myIP"
+    from_port       = 9100
+    to_port         = 9100
+    protocol        = "tcp"
+    cidr_blocks      = ["${var.myIP}/32"]
+  }    
   
   egress {
     from_port   = 0
