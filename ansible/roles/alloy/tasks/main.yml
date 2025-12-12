@@ -1,43 +1,65 @@
-- name: Install Grafana Alloy
-  become: true
-  block:
+- name: Install dependencies
+  apt:
+    name:
+      - gnupg
+      - wget
+    state: present
+    update_cache: false
 
-    - name: Install dependencies
-      apt:
-        name:
-          - gnupg
-          - wget
-        state: present
-        update_cache: false
+- name: Create keyrings dir
+  file:
+    path: /etc/apt/keyrings
+    state: directory
+    mode: "0755"
 
-    - name: Create keyrings dir
-      file:
-        path: /etc/apt/keyrings
-        state: directory
-        mode: "0755"
+- name: Install Grafana GPG key
+  shell: |
+    wget -q -O - https://apt.grafana.com/gpg.key \
+    | gpg --dearmor \
+    | tee /etc/apt/keyrings/grafana.gpg > /dev/null
+  args:
+    executable: /bin/bash
+    creates: /etc/apt/keyrings/grafana.gpg
 
-    - name: Install Grafana GPG key
-      shell: |
-        wget -q -O - https://apt.grafana.com/gpg.key \
-        | gpg --dearmor \
-        | tee /etc/apt/keyrings/grafana.gpg > /dev/null
-      args:
-        executable: /bin/bash
-        creates: /etc/apt/keyrings/grafana.gpg
+- name: Add Grafana repo
+  shell: |
+    echo "deb [signed-by=/etc/apt/keyrings/grafana.gpg] https://apt.grafana.com stable main" \
+    | tee /etc/apt/sources.list.d/grafana.list
+  args:
+    executable: /bin/bash
+    creates: /etc/apt/sources.list.d/grafana.list
 
-    - name: Add Grafana repo
-      shell: |
-        echo "deb [signed-by=/etc/apt/keyrings/grafana.gpg] https://apt.grafana.com stable main" \
-        | tee /etc/apt/sources.list.d/grafana.list
-      args:
-        executable: /bin/bash
-        creates: /etc/apt/sources.list.d/grafana.list
+- name: Update apt cache
+  apt:
+    update_cache: true
 
-    - name: Update apt cache
-      apt:
-        update_cache: true
+- name: Install alloy
+  apt:
+    name: alloy
+    state: present
 
-    - name: Install alloy
-      apt:
-        name: alloy
-        state: present
+- name: Create Alloy config directory
+  file:
+    path: /etc/alloy
+    state: directory
+    mode: "0755"
+
+- name: Deploy Alloy config
+  template:
+    src: config.alloy.j2
+    dest: "{{ alloy_config_path }}"
+    mode: "0644"
+  notify: Restart alloy
+
+- name: Deploy Alloy default config
+  template:
+    src: alloy.default.j2
+    dest: "{{ alloy_default_path }}"
+    mode: "0644"
+  notify: Restart alloy
+
+- name: Enable and start Alloy
+  systemd:
+    name: alloy
+    enabled: true
+    state: started

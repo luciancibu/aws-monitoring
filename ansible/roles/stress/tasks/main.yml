@@ -1,0 +1,26 @@
+    - name: Install stress
+      apt:
+        name: stress
+        state: present
+        update_cache: false
+
+    - name: Copy load generation scripts
+      copy:
+        src: "{{ item }}"
+        dest: "{{ remote_path }}/{{ item }}"
+        mode: "0755"
+      loop:
+        - load.sh
+        - generate_multi_logs.sh
+
+    - name: Start load.sh in background
+      shell: |
+        nohup {{ remote_path }}/load.sh > /dev/null 2>&1 &
+      args:
+        executable: /bin/bash
+
+    - name: Start generate_multi_logs.sh in background
+      shell: |
+        nohup {{ remote_path }}/generate_multi_logs.sh > /dev/null 2>&1 &
+      args:
+        executable: /bin/bash

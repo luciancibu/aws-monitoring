@@ -6,6 +6,7 @@
     - flask
     - node
     - alloy
+    - stress
 
 - name: Install Grafana
   hosts: grafana
