@@ -5,3 +5,15 @@ scrape_configs:
   - job_name: prometheus
     static_configs:
       - targets: ['localhost:9090']
+        labels:
+          app: "prometheus"      
+  - job_name: webserver-system
+    static_configs:
+      - targets: ['{{flask_private_ip}}:9100']
+        labels:
+          app: "web-system"
+  - job_name: webserver-appstat
+    static_configs:
+      - targets: ['{{flask_private_ip}}:5000']
+        labels:
+          app: "web-appstat"
