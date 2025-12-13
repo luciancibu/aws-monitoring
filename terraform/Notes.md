@@ -9,7 +9,7 @@ export ARN= arn:aws:secretsmanager:<ZONE>:<ACC-ID>:secret:<NAME>"   -> this valu
 terraform import   aws_secretsmanager_secret.mysql_secret  $ARN
 terraform apply
 
-    # Option 1 – Restore and reuse (NOT recommended)
+    # Option 2 – DForce delete (NOT recommended)
 aws secretsmanager delete-secret \
   --secret-id "${PROJECT_NAME_EXP}-mysql-secret" \
   --force-delete-without-recovery
