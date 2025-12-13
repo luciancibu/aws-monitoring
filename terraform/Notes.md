@@ -5,7 +5,8 @@ export PROJECT_NAME_EXP=monitoring
 aws secretsmanager restore-secret \
   --secret-id "${PROJECT_NAME_EXP}-mysql-secret"
 
-export ARN= arn:aws:secretsmanager:<ZONE>:<ACC-ID>:secret:<NAME>"   -> this value will be also prited after you run the restore command above
+export ARN= arn:aws:secretsmanager:<ZONE>:<ACC-ID>:secret:<NAME>"   -> this value will be also prited after you run the restore command above.
+
 terraform import   aws_secretsmanager_secret.mysql_secret  $ARN
 terraform apply
 
