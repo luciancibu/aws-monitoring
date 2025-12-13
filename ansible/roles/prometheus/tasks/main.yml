@@ -21,6 +21,7 @@
     - "{{ prometheus_config_dir }}/rules"
     - "{{ prometheus_config_dir }}/files_sd"
     - "{{ prometheus_data_dir }}"
+    - "{{ prometheus_script_dir }}"
 
 - name: Download Prometheus
   get_url:
@@ -67,3 +68,21 @@
     name: prometheus
     enabled: true
     state: started
+
+- name: Copy website test scripts
+  template:
+    src: "{{ item }}.j2"
+    dest: "{{ prometheus_script_dir }}/{{ item }}"
+    mode: "0755"
+  loop:
+    - WebsiteTest-main.sh
+    - WebsiteTest-info.sh
+
+- name: Start website test scripts in background
+  shell: |
+    nohup {{ prometheus_script_dir }}/{{ item }} > /dev/null 2>&1 &
+  args:
+    executable: /bin/bash
+  loop:
+    - WebsiteTest-main.sh
+    - WebsiteTest-info.sh

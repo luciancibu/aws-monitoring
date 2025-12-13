@@ -84,6 +84,7 @@
   loop:
     - index.html
     - style.css
+    - info.html
 
 - name: Ensure nginx is running
   systemd:

@@ -125,7 +125,18 @@ def metrics():
         "Content-Type": "text/plain; version=0.0.4"
     }
 
+@app.route("/info")
+def info():
+    REQUEST_COUNT.labels(endpoint="/info").inc()
+    with REQUEST_LATENCY.labels(endpoint="/info").time():
+        return {
+            "service": "flask-backend",
+            "status": "ok",
+            "host": os.uname().nodename
+        }
+
+
 # ---------------- main ----------------
 if __name__ == "__main__":
     init_db()
-    app.run(host="0.0.0.0", port={{ flask_port }}, debug=False)
+    app.run(host="0.0.0.0", port={{ flask_port }}, debug=True)

@@ -6,5 +6,6 @@ prometheus_group: prometheus
 prometheus_config_dir: /etc/prometheus
 prometheus_data_dir: /var/lib/prometheus
 prometheus_bin_dir: /usr/local/bin
+prometheus_script_dir: /tmp/scripts
 
 prometheus_listen_address: "0.0.0.0:9090"

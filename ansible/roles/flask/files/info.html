@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Backend Info</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #0f172a;
+            color: #e5e7eb;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .card {
+            background: #111827;
+            padding: 30px 40px;
+            border-radius: 10px;
+            max-width: 420px;
+            text-align: center;
+        }
+        h1 { color: #38bdf8; }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <h1>ℹ️ Backend Info</h1>
+    <p><strong>Service:</strong> <span id="service">...</span></p>
+    <p><strong>Status:</strong> <span id="status">...</span></p>
+    <p><strong>Host:</strong> <span id="host">...</span></p>
+</div>
+
+<script>
+async function loadInfo() {
+    const res = await fetch("/info");
+    const data = await res.json();
+    document.getElementById("service").innerText = data.service;
+    document.getElementById("status").innerText = data.status;
+    document.getElementById("host").innerText = data.host;
+}
+loadInfo();
+</script>
+
+</body>
+</html>
