@@ -78,6 +78,15 @@
     - WebsiteTest-info.sh
     - WebsiteTest-view.sh
 
+- name: Kill existing website test scripts
+  shell: killall "{{ item }}"
+  args:
+    executable: /bin/bash
+  loop:
+    - WebsiteTest-info.sh
+    - WebsiteTest-view.sh
+  ignore_errors: true
+
 - name: Start website test scripts in background
   shell: |
     nohup {{ prometheus_script_dir }}/{{ item }} > /dev/null 2>&1 &

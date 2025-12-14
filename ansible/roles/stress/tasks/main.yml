@@ -1,26 +1,34 @@
-    - name: Install stress
-      apt:
-        name: stress
-        state: present
-        update_cache: false
+- name: Install stress
+  apt:
+    name: stress
+    state: present
+    update_cache: false
 
-    - name: Copy load generation scripts
-      copy:
-        src: "{{ item }}"
-        dest: "{{ remote_path }}/{{ item }}"
-        mode: "0755"
-      loop:
-        - load.sh
-        - generate_multi_logs.sh
+- name: Copy load generation scripts
+  copy:
+    src: "{{ item }}"
+    dest: "{{ remote_path }}/{{ item }}"
+    mode: "0755"
+  loop:
+    - load.sh
+    - generate_multi_logs.sh
 
-    - name: Start load.sh in background
-      shell: |
-        nohup {{ remote_path }}/load.sh > /dev/null 2>&1 &
-      args:
-        executable: /bin/bash
+- name: Kill existing website test scripts
+  shell: killall "{{ item }}"
+  args:
+    executable: /bin/bash
+  loop:
+    - load.sh
+    - generate_multi_logs.sh
+  ignore_errors: true
+      
+- name: Start scripts.sh in background
+  shell: |
+    nohup {{ remote_path }}/{{ item }} > /dev/null 2>&1 &
+  args:
+    executable: /bin/bash
+  loop:
+    - load.sh
+    - generate_multi_logs.sh
 
-    - name: Start generate_multi_logs.sh in background
-      shell: |
-        nohup {{ remote_path }}/generate_multi_logs.sh > /dev/null 2>&1 &
-      args:
-        executable: /bin/bash
+
