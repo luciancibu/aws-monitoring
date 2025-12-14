@@ -75,8 +75,8 @@
     dest: "{{ prometheus_script_dir }}/{{ item }}"
     mode: "0755"
   loop:
-    - WebsiteTest-main.sh
     - WebsiteTest-info.sh
+    - WebsiteTest-view.sh
 
 - name: Start website test scripts in background
   shell: |
@@ -84,5 +84,5 @@
   args:
     executable: /bin/bash
   loop:
-    - WebsiteTest-main.sh
     - WebsiteTest-info.sh
+    - WebsiteTest-view.sh
