@@ -250,14 +250,6 @@ resource "aws_security_group" "loki_sg" {
   }  
 
   ingress {
-    description     = "Loki from my IP"
-    from_port       = 3100
-    to_port         = 3100
-    protocol        = "tcp"
-    cidr_blocks = ["${var.myIP}/32"]
-  }  
-
-  ingress {
     description = "SSH from my IP"
     from_port   = 22
     to_port     = 22
