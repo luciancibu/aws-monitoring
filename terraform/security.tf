@@ -79,7 +79,7 @@ resource "aws_security_group" "flask_sg" {
   }
 
   ingress {
-    description     = "Access from Alloy"
+    description     = "Access from Prometheus"
     from_port       = 9100
     to_port         = 9100
     protocol        = "tcp"
