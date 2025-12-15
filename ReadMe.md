@@ -4,13 +4,13 @@ AWS MONITORING STACK – TERRAFORM + ANSIBLE + GRAFANA / PROMETHEUS / LOKI
 
 OVERVIEW
 --------
-This project provisions and deploys a complete AWS-based monitoring stack
-using Terraform and Ansible.
+This project provisions and deploys a complete AWS-based monitoring and observability
+stack using Terraform and Ansible.
 
-Metrics are collected via Prometheus exporters and application endpoints,
-then scraped or received by Prometheus.
-Logs are collected by Grafana Alloy and stored in Loki.
-Grafana is used as the single visualization layer.
+Metrics and logs are collected through a combination of Prometheus exporters,
+application endpoints, and Grafana Alloy pipelines. Prometheus receives metrics
+via scraping and push-based integrations, while logs are collected and shipped
+to Loki by Grafana Alloy. Grafana acts as the unified visualization and alerting layer.
 
 ##  Application & Monitoring Flow
 
@@ -175,3 +175,29 @@ This dashboard shows:
 ![Grafana Dashboard](diagrams/grafana-dashboard.png)
 
 ---
+
+## Alerting & Notifications (Slack)
+
+This monitoring stack also includes **alerting and real-time notifications**
+integrated with **Slack**, enabling fast detection and response to incidents.
+
+Alerts are generated based on both **system-level** and **application-level**
+metrics collected by Prometheus and visualized in Grafana.
+
+---
+
+### Alerting Flow
+
+```text
+Metrics (Node Exporter / Flask)
+        ↓
+   Prometheus
+        ↓
+ Alert rule evaluation
+        ↓
+   Grafana Alerting
+        ↓
+      Slack
+```
+
+![Grafana Slack Alert](diagrams/slack-alert.png)
