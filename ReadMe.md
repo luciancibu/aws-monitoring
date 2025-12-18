@@ -15,9 +15,11 @@ to Loki by Grafana Alloy. Grafana acts as the unified visualization and alerting
 ##  Application & Monitoring Flow
 
 The diagram below illustrates the full observability flow:
-- Prometheus scrapes metrics from the application EC2
-- Grafana Alloy pushes logs to Loki
-- Grafana queries both Prometheus and Loki
+- Grafana Alloy runs on the application EC2 and scrapes application and node metrics locally (Flask + node_exporter)
+- Grafana Alloy pushes metrics to Prometheus using remote_write
+- Grafana Alloy collects application logs and pushes them to Loki
+- Prometheus acts as a remote_write receiver and stores metrics
+- Grafana queries Prometheus for metrics and Loki for logs
 
 ![Architecture Flow](diagrams/architecture-flow.png)
 
@@ -35,7 +37,7 @@ The infrastructure consists of 5 EC2 instances:
 
 3. Prometheus EC2
    - Prometheus server (TCP 9090)
-   - Scrapes metrics from exporters and applications
+   - Receives metrics via remote_write from Grafana Alloy
 
 4. Loki EC2
    - Loki log database (TCP 3100)
@@ -76,19 +78,23 @@ METRICS FLOW (PROMETHEUS)
 1. Node Exporter runs on the Application EC2
    - Exposes system metrics on TCP 9100
    - CPU, memory, disk, filesystem, load
-   - Synthetic stress logs
 
 2. Flask application exposes:
    - /metrics endpoint
 
-3. Prometheus EC2:
-   - Scrapes Node Exporter metrics
+3. Grafana Alloy runs on the Application EC2:
+   - Scrapes Node Exporter metrics locally
    - Scrapes Flask /metrics endpoint
+   - Pushes metrics to Prometheus via remote_write
+
+4. Prometheus EC2:
+   - Acts as a remote_write receiver
    - Stores time-series metrics
 
-4. Grafana:
+5. Grafana:
    - Queries Prometheus
    - Displays dashboards and alerts
+
 
 
 LOGGING FLOW (LOKI)
