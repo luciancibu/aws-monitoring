@@ -14,7 +14,9 @@ _secret_cache = None
 # ---------------- logging (systemd friendly) ----------------
 logging.basicConfig(
     level=logging.INFO,
-    format="%(asctime)s %(levelname)s %(message)s"
+    format="%(asctime)s %(levelname)s %(message)s",
+    filename="/var/log/titan/flask.log"
+
 )
 logger = logging.getLogger(__name__)
 
