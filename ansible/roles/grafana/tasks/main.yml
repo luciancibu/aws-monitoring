@@ -26,6 +26,16 @@
     deb: "/tmp/{{ grafana_package }}"
   notify: Restart Grafana
 
+- name: Deploy Grafana config
+  template:
+    src: {{ item }}
+    dest: "/etc/grafana/provisioning/datasources/{{ item | regex_replace('\\.j2$', '') }}"
+  loop:
+    - prometheus.yml.j2
+    - loki.yml.j2
+  notify: Restart Grafana
+
+
 - name: Enable and start Grafana service
   systemd:
     name: grafana-server
