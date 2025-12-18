@@ -9,16 +9,17 @@ stack using Terraform and Ansible.
 
 Metrics and logs are collected through a combination of Prometheus exporters,
 application endpoints, and Grafana Alloy pipelines. Prometheus receives metrics
-via scraping and push-based integrations, while logs are collected and shipped
+via direct scraping of exporters and application endpoints, while logs are collected and shipped
 to Loki by Grafana Alloy. Grafana acts as the unified visualization and alerting layer.
 
 ##  Application & Monitoring Flow
 
 The diagram below illustrates the full observability flow:
-- Grafana Alloy runs on the application EC2 and scrapes application and node metrics locally (Flask + node_exporter)
-- Grafana Alloy pushes metrics to Prometheus using remote_write
-- Grafana Alloy collects application logs and pushes them to Loki
-- Prometheus acts as a remote_write receiver and stores metrics
+- Prometheus scrapes system and application metrics directly from the Application EC2
+  (Node Exporter on port 9100 and Flask /metrics endpoint on port 5000)
+- Grafana Alloy runs on the Application EC2 and collects application and system logs
+- Grafana Alloy pushes logs to Loki
+- Grafana queries Prometheus for metrics and Loki for logs
 - Grafana queries Prometheus for metrics and Loki for logs
 
 ![Architecture Flow](diagrams/architecture-flow.png)
@@ -37,7 +38,7 @@ The infrastructure consists of 5 EC2 instances:
 
 3. Prometheus EC2
    - Prometheus server (TCP 9090)
-   - Receives metrics via remote_write from Grafana Alloy
+   - Scrapes metrics from exporters and application endpoints
 
 4. Loki EC2
    - Loki log database (TCP 3100)
@@ -65,8 +66,9 @@ NETWORK & ACCESS FLOW
   -> Prometheus EC2
 
 - Prometheus EC2
-  -> TCP 9100 (scrape)
-  -> Application EC2 (Node Exporter)
+  -> TCP 9100 (scrape Node Exporter)
+  -> TCP 5000 (scrape Flask /metrics)
+  -> Application EC2
 
 - Grafana Alloy (on Application EC2)
   -> TCP 3100 (push)
@@ -82,16 +84,12 @@ METRICS FLOW (PROMETHEUS)
 2. Flask application exposes:
    - /metrics endpoint
 
-3. Grafana Alloy runs on the Application EC2:
-   - Scrapes Node Exporter metrics locally
+3. Prometheus EC2:
+   - Scrapes Node Exporter metrics
    - Scrapes Flask /metrics endpoint
-   - Pushes metrics to Prometheus via remote_write
+   - Stores metrics
 
-4. Prometheus EC2:
-   - Acts as a remote_write receiver
-   - Stores time-series metrics
-
-5. Grafana:
+4. Grafana:
    - Queries Prometheus
    - Displays dashboards and alerts
 
@@ -120,7 +118,7 @@ LOGGING FLOW (LOKI)
    - Nginx (reverse proxy)
    - Flask backend application (/metrics exposed)
    - Node Exporter (system metrics)
-   - Grafana Alloy (logs & optional metrics)
+   - Grafana Alloy (log collection and shipping)
 
 REPOSITORY STRUCTURE
 --------------------
