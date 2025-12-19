@@ -22,7 +22,7 @@ cat > run.sh << 'SCRIPT'
 set -e
 
 cd ansible
-chmod 400 monitoring-key.pem
+chmod 400 monitoring-client-key.pem
 ansible-playbook playbook.yml
 SCRIPT
 EOF
