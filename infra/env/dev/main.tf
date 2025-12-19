@@ -261,3 +261,12 @@ module "loki_ec2" {
   vpc_security_group_ids = [module.loki_sg.id]
   availability_zone     = var.zone
 }
+
+# RDS
+module "rds" {
+  source = "../../modules/rds"
+
+  name = var.projectName
+  publicly_accessible = true
+  security_group_id = [module.rds_sg.id]
+}
