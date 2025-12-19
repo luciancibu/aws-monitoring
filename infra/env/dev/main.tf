@@ -177,3 +177,11 @@ module "loki_sg" {
     },    
   ]
 }
+
+# Keypair
+module "keypair" {
+  source = "../../modules/keypair"
+
+  project_name = var.projectName
+  output_path = "${local.ansible_dir}/"
+}
