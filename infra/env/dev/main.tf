@@ -262,6 +262,19 @@ module "loki_ec2" {
   availability_zone     = var.zone
 }
 
+module "prometheus_ec2" {
+  source = "../../modules/ec2"
+
+  name                  = var.projectName
+  project               = var.projectName
+  os                    = "ubuntu"
+  ami_id                = data.aws_ami.ubuntu_24_04.id
+  instance_type         = var.instanceType
+  key_name              = module.keypair.key_name
+  vpc_security_group_ids = [module.prometheus_sg.id]
+  availability_zone     = var.zone
+}
+
 # RDS
 module "rds" {
   source = "../../modules/rds"
@@ -269,4 +282,38 @@ module "rds" {
   name = var.projectName
   publicly_accessible = true
   security_group_id = [module.rds_sg.id]
+}
+
+# Inventory template
+resource "local_file" "ansible_inventory" {
+  filename = "${local.ansible_dir}/inventory"
+
+content = templatefile("${path.root}/../../templates/inventory.tmpl", {
+  clientkey = module.keypair.key_name
+
+  python_ip  = module.flask_ec2.private_ip
+  python_user  = var.ansibleUserByOS[module.flask_ec2.os]
+  python_ip_public  = module.flask_ec2.public_ip
+
+  grafana_ip  = module.grafana_ec2.private_ip
+  grafana_user  = var.ansibleUserByOS[module.prometheus_ec2.os]  
+
+  prometheus_ip  = module.grafana_ec2.private_ip
+  prometheus_user  = var.ansibleUserByOS[module.prometheus_ec2.os]
+
+  loki_ip  = module.loki_ec2.private_ip
+  loki_user  = var.ansibleUserByOS[module.loki_ec2.os]
+})
+}
+
+# Deployment script template
+resource "local_file" "deployment_script" {
+  filename = "${local.project_root_dir}/deployment_script.sh"
+
+content = templatefile("${path.root}/../../templates/deploy.tmpl", {
+  clientkey = module.keypair.key_name
+
+  ansible_pub_ip  = module.ansible_ec2.public_ip
+  ansible_user  = var.ansibleUserByOS[module.ansible_ec2.os]
+})
 }

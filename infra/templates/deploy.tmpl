@@ -1,9 +1,9 @@
 #!/bin/bash
 
 PROJECT_DIR="$(cd "$(dirname "$0")" && pwd)"
-CONTROL_NODE_IP=${ansible_ip}
+CONTROL_NODE_IP=${ansible_pub_ip}
 USER=${ansible_user}
-CLIENT_KEY=${clientkey}
+CLIENT_KEY="${clientkey}.pem"
 REMOTE_PATH="/home/$USER"
 
 echo "Deleting old files..."
@@ -17,12 +17,12 @@ ssh -i "$PROJECT_DIR/ansible/$CLIENT_KEY" \
     -o StrictHostKeyChecking=no \
     -o UserKnownHostsFile=/dev/null \
     "$USER@$CONTROL_NODE_IP" << 'EOF'
-cat > run.sh << SCRIPT
+cat > run.sh << 'SCRIPT'
 #!/bin/bash
 set -e
 
 cd ansible
-chmod 400 monitoring-client-key.pem
+chmod 400 monitoring-key.pem
 ansible-playbook playbook.yml
 SCRIPT
 EOF

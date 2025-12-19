@@ -22,7 +22,7 @@
     "type": "shell",
     "command": "terraform apply --auto-approve",
     "options": {
-        "cwd": "${workspaceFolder}/terraform",
+        "cwd": "${workspaceFolder}/infra/env/dev",
         "shell": {
         "executable": "C:\\Program Files\\Git\\bin\\bash.exe",
         "args": ["--login", "-i", "-c"]

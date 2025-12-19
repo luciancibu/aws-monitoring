@@ -28,7 +28,7 @@
 
 - name: Deploy Grafana config
   template:
-    src: {{ item }}
+    src: "{{ item }}"
     dest: "/etc/grafana/provisioning/datasources/{{ item | regex_replace('\\.j2$', '') }}"
   loop:
     - prometheus.yml.j2
