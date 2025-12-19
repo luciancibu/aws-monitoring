@@ -294,9 +294,9 @@ content = templatefile("${path.root}/../../templates/inventory.tmpl", {
   python_ip_public  = module.flask_ec2.public_ip
 
   grafana_ip  = module.grafana_ec2.private_ip
-  grafana_user  = var.ansibleUserByOS[module.prometheus_ec2.os]  
+  grafana_user  = var.ansibleUserByOS[module.grafana_ec2.os]  
 
-  prometheus_ip  = module.grafana_ec2.private_ip
+  prometheus_ip  = module.prometheus_ec2.private_ip
   prometheus_user  = var.ansibleUserByOS[module.prometheus_ec2.os]
 
   loki_ip  = module.loki_ec2.private_ip

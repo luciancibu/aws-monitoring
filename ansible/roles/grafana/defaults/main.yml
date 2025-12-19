@@ -6,3 +6,11 @@ grafana_arch: "linux_amd64"
 grafana_package: "grafana-enterprise_{{ grafana_version }}_{{ grafana_build }}_{{ grafana_arch }}.deb"
 grafana_download_url: "https://dl.grafana.com/grafana-enterprise/release/{{ grafana_version }}/{{ grafana_package }}"
 
+grafana_provisioning_dir: /etc/grafana/provisioning
+grafana_datasources_dir: "{{ grafana_provisioning_dir }}/datasources"
+grafana_dashboards_provisioning_dir: "{{ grafana_provisioning_dir }}/dashboards"
+
+grafana_dashboards_dir: /var/lib/grafana/dashboards
+
+grafana_user: grafana
+grafana_group: grafana

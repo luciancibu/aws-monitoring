@@ -29,15 +29,40 @@
 - name: Deploy Grafana config
   template:
     src: "{{ item }}"
-    dest: "/etc/grafana/provisioning/datasources/{{ item | regex_replace('\\.j2$', '') }}"
+    dest: "{{ grafana_datasources_dir }}/{{ item | regex_replace('\\.j2$', '') }}"
+    owner: "{{ grafana_user }}"
+    group: "{{ grafana_group }}"
   loop:
     - prometheus.yml.j2
     - loki.yml.j2
   notify: Restart Grafana
-
 
 - name: Enable and start Grafana service
   systemd:
     name: grafana-server
     enabled: true
     state: started
+
+- name: Create dashboards directory
+  file:
+    path: "{{ grafana_dashboards_dir }}"
+    state: directory
+    owner: "{{ grafana_user }}"
+    group: "{{ grafana_group }}"
+
+- name: Deploy dashboard provisioning config
+  template:
+    src: dashboards.yml.j2
+    dest: "{{ grafana_dashboards_provisioning_dir }}/dashboards.yml"
+    owner: "{{ grafana_user }}"
+    group: "{{ grafana_group }}"
+  notify: Restart Grafana
+
+- name: Copy dashboards
+  copy:
+    src: dashboards/
+    dest: "{{ grafana_dashboards_dir }}/"
+    owner: "{{ grafana_user }}"
+    group: "{{ grafana_group }}"
+  notify: Restart Grafana
+
