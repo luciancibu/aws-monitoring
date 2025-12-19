@@ -185,6 +185,12 @@ module "keypair" {
   project_name = var.projectName
   output_path = "${local.ansible_dir}/"
 }
+# IAM
+module "iam" {
+  source = "../../modules/iam"
+
+  project_name       = var.projectName
+}
 
 # Instances
 module "ansible_ec2" {
@@ -219,6 +225,7 @@ module "flask_ec2" {
   key_name              = module.keypair.key_name
   vpc_security_group_ids = [module.flask_sg.id]
   availability_zone     = var.zone
+  iam_instance_profile = module.iam.ec2_instance_profile_name
 
   root_block_device = {
     volume_size           = 10
