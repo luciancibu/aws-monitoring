@@ -185,3 +185,72 @@ module "keypair" {
   project_name = var.projectName
   output_path = "${local.ansible_dir}/"
 }
+
+# Instances
+module "ansible_ec2" {
+  source = "../../modules/ec2"
+
+  name                  = var.projectName
+  project               = var.projectName
+  os                    = "ubuntu"
+  ami_id                = data.aws_ami.ubuntu_24_04.id
+  instance_type         = var.instanceType
+  key_name              = module.keypair.key_name
+  vpc_security_group_ids = [module.ansible_sg.id]
+  availability_zone     = var.zone
+
+  root_block_device = {
+    volume_size           = 20
+    volume_type           = "gp3"
+    delete_on_termination = true
+  }
+
+  user_data = file("${path.module}/../../modules/user-data/ansible.sh")
+}
+
+module "flask_ec2" {
+  source = "../../modules/ec2"
+
+  name                  = var.projectName
+  project               = var.projectName
+  os                    = "ubuntu"
+  ami_id                = data.aws_ami.ubuntu_24_04.id
+  instance_type         = var.instanceType
+  key_name              = module.keypair.key_name
+  vpc_security_group_ids = [module.flask_sg.id]
+  availability_zone     = var.zone
+
+  root_block_device = {
+    volume_size           = 10
+    volume_type           = "gp3"
+    delete_on_termination = true
+  }
+
+  user_data = file("${path.module}/../../modules/user-data/flask.sh")
+}
+
+module "grafana_ec2" {
+  source = "../../modules/ec2"
+
+  name                  = var.projectName
+  project               = var.projectName
+  os                    = "ubuntu"
+  ami_id                = data.aws_ami.ubuntu_24_04.id
+  instance_type         = var.instanceType
+  key_name              = module.keypair.key_name
+  vpc_security_group_ids = [module.grafana_sg.id]
+  availability_zone     = var.zone
+}
+
+module "loki_ec2" {
+  source = "../../modules/ec2"
+
+  name                  = var.projectName
+  project               = var.projectName
+  os                    = "ubuntu"
+  ami_id                = data.aws_ami.ubuntu_24_04.id
+  instance_type         = var.instanceType
+  key_name              = module.keypair.key_name
+  vpc_security_group_ids = [module.loki_sg.id]
+  availability_zone     = var.zone
+}

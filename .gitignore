@@ -8,8 +8,7 @@ deployment_script.sh
 *.tfvars
 *.ini
 *.pem
-ansible/inventory
-ansible/monitoring*
-ansible/roles/app/templates/flask.service.j2
+*.tfstate
+*.json
 *.zip
 *.pem
