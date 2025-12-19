@@ -1,207 +1,164 @@
+# AWS Monitoring Stack
+Terraform + Ansible + Grafana + Prometheus + Loki
 
-AWS MONITORING STACK – TERRAFORM + ANSIBLE + GRAFANA / PROMETHEUS / LOKI
-=====================================================================
+## Overview
+This project deploys a AWS-based monitoring and observability stack using **Terraform** for infrastructure and **Ansible** for configuration management.
 
-OVERVIEW
---------
-This project provisions and deploys a complete AWS-based monitoring and observability
-stack using Terraform and Ansible.
+Metrics are collected by **Prometheus** via direct scraping of system exporters and application endpoints.  
+Logs are collected and shipped to **Loki** using **Grafana Alloy** agents.  
+**Grafana** acts as the unified visualization and alerting layer.
 
-Metrics and logs are collected through a combination of Prometheus exporters,
-application endpoints, and Grafana Alloy pipelines. Prometheus receives metrics
-via direct scraping of exporters and application endpoints, while logs are collected and shipped
-to Loki by Grafana Alloy. Grafana acts as the unified visualization and alerting layer.
+All Grafana datasources and dashboards are **automatically provisioned via Ansible**.  
+No manual UI configuration is required.
 
-##  Application & Monitoring Flow
+---
 
-The diagram below illustrates the full observability flow:
-- Prometheus scrapes system and application metrics directly from the Application EC2
-  (Node Exporter on port 9100 and Flask /metrics endpoint on port 5000)
-- Grafana Alloy runs on the Application EC2 and collects application and system logs
-- Grafana Alloy pushes logs to Loki
-- Grafana queries Prometheus for metrics and Loki for logs
-- Grafana queries Prometheus for metrics and Loki for logs
+## Application & Monitoring Flow
+- Prometheus scrapes:
+  - Node Exporter (system metrics)
+  - Flask application `/metrics` endpoint
+- Grafana Alloy runs on the Application EC2:
+  - Collects system and application logs
+  - Pushes logs to Loki
+- Grafana queries:
+  - Prometheus for metrics
+  - Loki for logs
 
-![Architecture Flow](diagrams/architecture-flow.png)
+---
 
-HIGH-LEVEL ARCHITECTURE
-----------------------
-The infrastructure consists of 5 EC2 instances:
+## High-Level Architecture
 
-1. Ansible Control Node
+The infrastructure consists of **five EC2 instances**:
+
+1. **Ansible Control Node**
    - Executes Ansible playbooks
    - Manages all other EC2 instances
 
-2. Grafana EC2
+2. **Grafana EC2**
    - Grafana UI (TCP 3000)
    - Queries Prometheus and Loki
 
-3. Prometheus EC2
+3. **Prometheus EC2**
    - Prometheus server (TCP 9090)
-   - Scrapes metrics from exporters and application endpoints
+   - Scrapes metrics from exporters and applications
 
-4. Loki EC2
-   - Loki log database (TCP 3100)
+4. **Loki EC2**
+   - Loki log storage (TCP 3100)
    - Receives logs from Alloy agents
 
-5. Application EC2
+5. **Application EC2**
    - Nginx (HTTP entrypoint)
    - Flask backend application
    - Node Exporter (metrics)
-   - Alloy (logs)
+   - Grafana Alloy (log collection)
 
+---
 
-NETWORK & ACCESS FLOW
----------------------
-- Internet / Users
-  -> TCP 80
-  -> Application EC2 (Nginx + Flask)
+## Network & Access Flow
+- Internet / Users  
+  → TCP 80 → Application EC2
 
-- Admin IPs
-  -> TCP 3000
-  -> Grafana EC2
+- Admin IPs  
+  → TCP 3000 → Grafana EC2
 
-- Grafana EC2
-  -> TCP 9090 (queries)
-  -> Prometheus EC2
+- Grafana EC2  
+  → TCP 9090 → Prometheus EC2  
+  → TCP 3100 → Loki EC2
 
-- Prometheus EC2
-  -> TCP 9100 (scrape Node Exporter)
-  -> TCP 5000 (scrape Flask /metrics)
-  -> Application EC2
+- Prometheus EC2  
+  → TCP 9100 → Node Exporter  
+  → TCP 5000 → Flask `/metrics`
 
-- Grafana Alloy (on Application EC2)
-  -> TCP 3100 (push)
-  -> Loki EC2
+- Grafana Alloy (Application EC2)  
+  → TCP 3100 → Loki EC2
 
+---
 
-METRICS FLOW (PROMETHEUS)
-------------------------
-1. Node Exporter runs on the Application EC2
-   - Exposes system metrics on TCP 9100
-   - CPU, memory, disk, filesystem, load
+## Metrics Flow (Prometheus)
+1. Node Exporter exposes system metrics (CPU, memory, disk, load)
+2. Flask application exposes `/metrics`
+3. Prometheus scrapes all targets
+4. Grafana visualizes metrics via dashboards and alerts
 
-2. Flask application exposes:
-   - /metrics endpoint
+---
 
-3. Prometheus EC2:
-   - Scrapes Node Exporter metrics
-   - Scrapes Flask /metrics endpoint
-   - Stores metrics
-
-4. Grafana:
-   - Queries Prometheus
-   - Displays dashboards and alerts
-
-
-
-LOGGING FLOW (LOKI)
-------------------
-1. Applications generate logs on Application EC2:
-   - Flask logs
-   - Nginx access & error logs
-
-2. Alloy runs on the same Application EC2:
+## Logging Flow (Loki)
+1. Flask and Nginx generate logs on Application EC2
+2. Grafana Alloy:
    - Tails log files
-   - Enriches logs with labels
+   - Adds labels
    - Pushes logs to Loki
+3. Loki stores logs
+4. Grafana queries and visualizes logs
 
-3. Loki EC2:
-   - Stores logs
-   - Provides log query API
+---
 
-4. Grafana:
-   - Queries Loki
-   - Visualizes and filters logs
-
-5. Application EC2
-   - Nginx (reverse proxy)
-   - Flask backend application (/metrics exposed)
-   - Node Exporter (system metrics)
-   - Grafana Alloy (log collection and shipping)
-
-REPOSITORY STRUCTURE
---------------------
-
-```text
-aws-monitoring/
-├── terraform/
-│   ├── provider.tf          # AWS provider configuration
-│   ├── instances.tf         # EC2 instances (Grafana, Prometheus, Loki, App, Ansible)
-│   ├── security.tf          # Security Groups & networking rules
-│   ├── rds.tf               # RDS MySQL instance
-│   ├── iam.tf               # IAM roles & policies (Secrets Manager access)
-│   ├── variables.tf         # Input variables
-│   ├── outputs.tf           # Terraform outputs
-│   └── templates/
-│       ├── deploy.tmpl      # Generates deployment script after terraform apply
-│       └── inventory.tmpl   # Generates Ansible inventory
-│
-└── ansible/
-    ├── playbook.yml         # Main Ansible playbook
-    ├── inventory            # Generated by Terraform
-    └── roles/
-        ├── grafana/         # Grafana installation & configuration
-        ├── prometheus/      # Prometheus server setup
-        ├── loki/            # Loki server setup
-        ├── node/            # Node Exporter (system metrics)
-        ├── alloy/           # Grafana Alloy agent (log shipping)
-        ├── flask/           # Flask app + Nginx configuration
-        └── stress/          # Load & log generation for demo/testing
+## Repository Structure
 
 ```
+aws-monitoring/
+├── ansible/
+│   ├── ansible.cfg
+│   ├── inventory
+│   ├── playbook.yml
+│   ├── roles/
+│   │   ├── grafana/
+│   │   │   ├── defaults/
+│   │   │   ├── handlers/
+│   │   │   ├── tasks/
+│   │   │   ├── templates/
+│   │   │   └── files/
+│   │   │       └── dashboards/
+│   │   ├── prometheus/
+│   │   ├── loki/
+│   │   ├── node/
+│   │   ├── alloy/
+│   │   ├── flask/
+│   │   └── stress/
+│   └── terraform.tfstate
+│
+└── infra/
+    ├── env/
+    │   └── dev/
+    ├── modules/
+    │   ├── ec2/
+    │   ├── iam/
+    │   ├── keypair/
+    │   ├── rds/
+    │   ├── security-group/
+    │   └── user-data/
+    └── templates/
+```
 
-DEPLOYMENT FLOW
----------------
-1. Terraform Apply
-   - Provisions infrastructure
+---
+
+## Deployment Flow
+
+1. **Terraform Apply**
+   - Provisions AWS infrastructure
    - Generates Ansible inventory and deploy script
 
-2. VS Code Task
-   - Runs terraform apply
-   - Executes generated deploy script
+2. **Deployment Script**
+   - Executes Ansible playbook from control node
 
-3. Ansible
-   - Installs services
-   - Configures exporters and agents
-   - Starts systemd services
+3. **Ansible**
+   - Installs and configures services
+   - Provisions Grafana datasources and dashboards
+   - Starts all systemd services
 
+---
 
-# AWS Monitoring Stack
-
-## 📊 Grafana Dashboard (Metrics & Logs)
-
-This dashboard shows:
+## Grafana Dashboards
+Provisioned automatically via Ansible:
 - HTTP request rate and latency
-- System CPU, memory, disk usage
+- CPU, memory, disk usage
 - Application warnings and errors via Loki
 
-![Grafana Dashboard](diagrams/grafana-dashboard.png)
-
 ---
 
-## Alerting & Notifications (Slack)
-
-This monitoring stack also includes **alerting and real-time notifications**
-integrated with **Slack**, enabling fast detection and response to incidents.
-
-Alerts are generated based on both **system-level** and **application-level**
-metrics collected by Prometheus and visualized in Grafana.
+## Alerting & Notifications
+- Prometheus evaluates alert rules
+- Grafana handles alerting
+- Notifications are sent to **Slack**
 
 ---
-
-### Alerting Flow
-
-```text
-Metrics (Node Exporter / Flask)
-        ↓
-   Prometheus
-        ↓
- Alert rule evaluation
-        ↓
-   Grafana Alerting
-        ↓
-      Slack
-```
-
-![Grafana Slack Alert](diagrams/slack-alert.png)
