@@ -1,0 +1,5 @@
+---
+awscli_download_url: "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip"
+awscli_zip_dir: "/tmp/awscliv2.zip"
+awscli_temp_dir: "/tmp/aws"
+awscli_dir: "/usr/local/bin/aws"

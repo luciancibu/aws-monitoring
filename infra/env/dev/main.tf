@@ -196,7 +196,7 @@ module "iam" {
 module "ansible_ec2" {
   source = "../../modules/ec2"
 
-  name                  = var.projectName
+  name                  = "${var.projectName}-ansible"
   project               = var.projectName
   os                    = "ubuntu"
   ami_id                = data.aws_ami.ubuntu_24_04.id
@@ -217,7 +217,7 @@ module "ansible_ec2" {
 module "flask_ec2" {
   source = "../../modules/ec2"
 
-  name                  = var.projectName
+  name                  = "${var.projectName}-flask"
   project               = var.projectName
   os                    = "ubuntu"
   ami_id                = data.aws_ami.ubuntu_24_04.id
@@ -232,14 +232,12 @@ module "flask_ec2" {
     volume_type           = "gp3"
     delete_on_termination = true
   }
-
-  user_data = file("${path.module}/../../modules/user-data/flask.sh")
 }
 
 module "grafana_ec2" {
   source = "../../modules/ec2"
 
-  name                  = var.projectName
+  name                  = "${var.projectName}-grafana"
   project               = var.projectName
   os                    = "ubuntu"
   ami_id                = data.aws_ami.ubuntu_24_04.id
@@ -252,7 +250,7 @@ module "grafana_ec2" {
 module "loki_ec2" {
   source = "../../modules/ec2"
 
-  name                  = var.projectName
+  name                  = "${var.projectName}-loki"
   project               = var.projectName
   os                    = "ubuntu"
   ami_id                = data.aws_ami.ubuntu_24_04.id
@@ -265,7 +263,7 @@ module "loki_ec2" {
 module "prometheus_ec2" {
   source = "../../modules/ec2"
 
-  name                  = var.projectName
+  name                  = "${var.projectName}-prometheus"
   project               = var.projectName
   os                    = "ubuntu"
   ami_id                = data.aws_ami.ubuntu_24_04.id

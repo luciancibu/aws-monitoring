@@ -10,8 +10,37 @@
       - python3
       - python3-pip
       - python3-venv
+      - unzip
+      - zip
+      - curl
     state: present
     update_cache: yes
+
+- name: Download AWS CLI v2
+  get_url:
+    url: "{{ awscli_download_url }}"
+    dest: "{{ awscli_zip_dir }}"
+    mode: '0644'
+
+- name: Unzip AWS CLI
+  unarchive:
+    src: "{{ awscli_zip_dir }}"
+    dest: "/tmp"
+    remote_src: yes
+    creates: "{{ awscli_temp_dir }}"
+
+- name: Install AWS CLI v2
+  command: "{{ awscli_temp_dir }}/install"
+  args:
+    creates: "{{ awscli_dir }}"
+
+- name: Create Flask log directory
+  file:
+    path: /var/log/titan
+    state: directory
+    owner: root
+    group: root
+    mode: '0755'
 
 - name: Create virtualenv
   command: python3 -m venv /opt/flaskenv
