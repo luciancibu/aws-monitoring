@@ -60,3 +60,8 @@ variable "security_group_id" {
 variable "publicly_accessible" {
   type    = bool
 }
+
+variable "port" {
+  type    = number
+  default = 10
+}

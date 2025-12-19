@@ -1,5 +1,6 @@
 _tests
 deployment_script.sh
+*inventory*
 *.txt
 *.exe
 *.hcl
